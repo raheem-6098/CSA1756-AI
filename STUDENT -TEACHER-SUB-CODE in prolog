@@ -1,0 +1,23 @@
+% Facts about students and their enrolled subjects
+enrolled('Alice', 'Math').
+enrolled('Bob', 'Science').
+enrolled('Charlie', 'Math').
+enrolled('David', 'History').
+
+% Facts about teachers and the subjects they teach
+teaches('Mr. Smith', 'Math').
+teaches('Ms. Johnson', 'Science').
+teaches('Mr. Brown', 'History').
+
+% Rule to find the teacher for a given subject
+find_teacher(Subject, Teacher) :-
+    teaches(Teacher, Subject).
+
+% Rule to find students enrolled in a given subject
+find_students(Subject, Student) :-
+    enrolled(Student, Subject).
+
+% Rule to find all students taught by a given teacher
+find_students_by_teacher(Teacher, Student) :-
+    teaches(Teacher, Subject),
+    enrolled(Student, Subject)
