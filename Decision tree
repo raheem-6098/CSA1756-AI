@@ -1,0 +1,83 @@
+import math
+
+def entropy(data):
+    total = len(data)
+    if total == 0:
+        return 0
+    labels = {}
+    for row in data:
+        label = row[-1]  
+        if label not in labels:
+            labels[label] = 0
+        labels[label] += 1
+    entropy_value = 0
+    for label in labels.values():
+        prob = label / total
+        entropy_value -= prob * math.log(prob, 2)
+    return entropy_value
+
+def information_gain(data, feature_index):
+    total_entropy = entropy(data)
+    values = set([row[feature_index] for row in data])
+    weighted_entropy = 0
+    for value in values:
+        subset = [row for row in data if row[feature_index] == value]
+        weighted_entropy += (len(subset) / len(data)) * entropy(subset)
+    return total_entropy - weighted_entropy
+
+def split_data(data, feature_index, value):
+    return [row for row in data if row[feature_index] == value]
+
+def build_tree(data, features):
+    labels = [row[-1] for row in data]
+    if len(set(labels)) == 1:
+        return labels[0]
+    
+    if not features:
+        return max(set(labels), key=labels.count)
+    
+    best_feature = -1
+    best_gain = -float('inf')
+    for feature_index in range(len(features)):
+        gain = information_gain(data, feature_index)
+        if gain > best_gain:
+            best_gain = gain
+            best_feature = feature_index
+    
+    tree = {features[best_feature]: {}}
+    feature_values = set([row[best_feature] for row in data])
+    for value in feature_values:
+        subset = split_data(data, best_feature, value)
+        tree[features[best_feature]][value] = build_tree(subset, [f for f in features if f != features[best_feature]])
+    
+    return tree
+
+def predict(tree, sample):
+    if not isinstance(tree, dict):
+        return tree
+    
+    feature = list(tree.keys())[0]
+    value = sample[feature]
+    return predict(tree[feature].get(value), sample)
+
+data = [
+    {'Age': 30, 'Income': 'High', 'Buy': 'No'},
+    {'Age': 40, 'Income': 'High', 'Buy': 'Yes'},
+    {'Age': 50, 'Income': 'Medium', 'Buy': 'Yes'},
+    {'Age': 20, 'Income': 'Low', 'Buy': 'No'},
+    {'Age': 30, 'Income': 'Low', 'Buy': 'No'},
+    {'Age': 40, 'Income': 'Low', 'Buy': 'Yes'},
+    {'Age': 50, 'Income': 'High', 'Buy': 'Yes'},
+    {'Age': 60, 'Income': 'Medium', 'Buy': 'Yes'},
+    {'Age': 40, 'Income': 'Medium', 'Buy': 'No'},
+    {'Age': 20, 'Income': 'Low', 'Buy': 'No'}
+]
+
+features = ['Age', 'Income']
+
+tree = build_tree(data, features)
+print("Decision Tree:", tree)
+
+sample = {'Age': 30, 'Income': 'Low'}
+result = predict(tree, sample)
+print("Prediction for sample:", result)
