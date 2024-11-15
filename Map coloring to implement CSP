@@ -1,0 +1,56 @@
+map_graph = {
+    "A": ["B", "C", "D"],
+    "B": ["A", "C", "E"],
+    "C": ["A", "B", "D", "E"],
+    "D": ["A", "C", "E"],
+    "E": ["B", "C", "D"]
+}
+
+colors = ["Red", "Green", "Blue"]
+
+def is_valid_color(region, color, assignment):
+    for neighbor in map_graph[region]:
+        if assignment.get(neighbor) == color:
+            return False
+    return True
+
+
+def solve_csp(assignment):
+    
+    if len(assignment) == len(map_graph):
+        return assignment
+
+   
+    unassigned = [region for region in map_graph if region not in assignment]
+
+    
+    region = unassigned[0]
+
+    
+    for color in colors:
+        if is_valid_color(region, color, assignment):
+            
+            assignment[region] = color
+
+            
+            result = solve_csp(assignment)
+            if result:
+                return result
+
+            
+            del assignment[region]
+
+    return None
+
+
+initial_assignment = {}
+
+solution = solve_csp(initial_assignment)
+
+
+if solution:
+    print("Solution found:")
+    for region, color in solution.items():
+        print(f"{region}: {color}")
+else:
+    print("No solution exists.")
